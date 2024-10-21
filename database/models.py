@@ -20,9 +20,8 @@ class Professionals(Base):
     industry = Column(Text)
     keyword = Column(Text)
     description = Column(Text)
-    inserted_at = Column(DateTime(timezone=True))
-    updated_at = Column(DateTime, default=datetime.utcnow())
-    pdf_file = Column(BLOB)
+    inserted_at = Column(DateTime, default=datetime.utcnow)  # Set on insert
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     __table_args__ = (
         UniqueConstraint('name', 'email', 'keyword'),
     )
@@ -43,3 +42,21 @@ class Professionals(Base):
     #
     # def __repr__(self):
     #     return f"({self.id}  {self.file_name}  {self.published_at}  {self.inserted_at})"
+
+
+from pydantic import BaseModel, EmailStr
+from typing import Optional
+
+
+class ProfessionalCreate(BaseModel):
+    company: Optional[str]
+    name: str
+    designation: Optional[str]
+    email: EmailStr
+    phone: Optional[str]
+    city: Optional[str]
+    weblink: Optional[str]
+    services: Optional[str]
+    industry: Optional[str]
+    keyword: Optional[str]
+    description: Optional[str]
