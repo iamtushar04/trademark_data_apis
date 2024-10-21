@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DATABASE_URL = "sqlite:///D://Database backups//Trademark Websites//law_firms_data.db"
+DATABASE_URL = "sqlite:///database/law_firms_data.db"
 
 
 # Instantiate the DatabaseManager class with the SQLite database URL
@@ -52,7 +52,7 @@ async def get_companies(db: Session = Depends(get_db)):
 @app.get("/attorneys/")
 def read_attorneys(db: Session = Depends(get_db)):
     professionals = Attorneys(db)
-    attorneys = professionals.get_attorneys(limit=20)
+    attorneys = professionals.get_attorneys(limit=10000)
     return [dict(zip(attorney._fields, attorney)) for attorney in attorneys]
 #
 #
