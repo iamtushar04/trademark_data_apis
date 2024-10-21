@@ -1,13 +1,14 @@
 # app/main.py
 
-from fastapi import FastAPI, Depends, HTTPException, APIRouter
+from fastapi import FastAPI, Depends, HTTPException, APIRouter, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 # from source.attorneys import Attorneys
 from source.professionals import Attorneys, get_db
 from starlette.middleware.cors import CORSMiddleware
 from datetime import datetime
+from database.models import Professionals, ProfessionalCreate
 
 router = APIRouter()
 
@@ -40,20 +41,50 @@ async def get_companies(db: Session = Depends(get_db)):
     return {"companies": companies, "designations": designations, "services": services}
 
 
-@app.get("/get_designations/")
-async def get_companies(db: Session = Depends(get_db)):
+# # API route to get all users
+# @app.get("/attorneys/")
+# def read_attorneys(db: Session = Depends(get_db)):
+#     professionals = Attorneys(db)
+#     attorneys = professionals.get_attorneys(limit=20)
+#     return [dict(zip(attorney._fields, attorney)) for attorney in attorneys]
+
+
+@app.get("/attorneys/")
+def read_attorneys(
+        company: Optional[str] = Query(None, description="Company name"),
+        designation: Optional[str] = Query(None, description="Designation"),
+        keyword: Optional[str] = Query(None, description="Service type"),
+        limit: Optional[int] = 50,
+        db: Session = Depends(get_db)
+):
     professionals = Attorneys(db)
-    companies = professionals.get_designations()
-    companies = [company[0] for company in companies]
-    return {"companies": companies, "total": len(companies)}
+
+    attorneys = professionals.get_attorneys(company=company, designation=designation, keyword=keyword, limit=limit)
+    return [dict(zip(attorney._fields, attorney)) for attorney in attorneys]
 
 
 # API route to get all users
-@app.get("/attorneys/")
-def read_attorneys(db: Session = Depends(get_db)):
+@app.post("/add_attorney/")
+def add_attorney(professional: ProfessionalCreate, db: Session = Depends(get_db)):
     professionals = Attorneys(db)
-    attorneys = professionals.get_attorneys(limit=10000)
-    return [dict(zip(attorney._fields, attorney)) for attorney in attorneys]
+    new_record = {
+        "company": professional.company,
+        "name": professional.name,
+        "designation": professional.designation,
+        "email": professional.email,
+        "phone": professional.phone,
+        "services": professional.services,
+        "weblink": professional.weblink,
+        "industry": professional.industry,
+        "keyword": professional.keyword,
+        "description": professional.description
+    }
+    try:
+        professionals.add_attorney(new_record)
+        return {"message": "Attorney added successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 #
 #
 # # API route to get a specific user by ID
