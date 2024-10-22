@@ -19,7 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DATABASE_URL = "sqlite:///database/law_firms_data.db"
+DATABASE_URL = "sqlite:///D://Database backups//Trademark Websites//law_firms_data.db"
 
 
 # Instantiate the DatabaseManager class with the SQLite database URL
@@ -60,9 +60,9 @@ async def get_designations(company: Optional[list] = Query(None, description="Co
 
 @app.get("/attorneys/")
 def read_attorneys(
-        company: Optional[str] = Query(None, description="Company name"),
-        designation: Optional[str] = Query(None, description="Designation"),
-        keyword: Optional[str] = Query(None, description="Service type"),
+        company: Optional[list] = Query(None, description="Company name"),
+        designation: Optional[list] = Query(None, description="Designation"),
+        keyword: Optional[list] = Query(None, description="Service type"),
         limit: Optional[int] = 50,
         db: Session = Depends(get_db)
 ):

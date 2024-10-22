@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import create_engine, text, func
 from database.models import Professionals
 
-DATABASE_URL = "sqlite:///database/law_firms_data.db"
+DATABASE_URL = "sqlite:///D://Database backups//Trademark Websites//law_firms_data.db"
 ENGINE = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(bind=ENGINE)
 
@@ -73,25 +73,10 @@ class Attorneys:
         finally:
             self.session.close()
 
-    # def get_attorneys(self, limit: int = 10):
-    #     """
-    #     :Title: Funtion to query to 3GPP database to get file content
-    #     :return:
-    #     """
-    #     try:
-    #         query = text(
-    #             f"SELECT company, name, designation, email, phone, services, weblink from professionals limit 100;")
-    #         fts_results = self.session.execute(query)
-    #         return fts_results.fetchall()
-    #     except SQLAlchemyError as e:
-    #         logging.error(f"Error querying 3GPP database: {str(e)}")
-    #         return []
-    #     finally:
-    #         self.session.close()
     def get_attorneys(self,
-                      company: Optional[str] = None,
-                      designation: Optional[str] = None,
-                      keyword: Optional[str] = None,
+                      company=None,
+                      designation=None,
+                      keyword=None,
                       limit: int = 10
                       ):
         """
@@ -105,47 +90,34 @@ class Attorneys:
             # Dynamic query construction based on provided parameters
             filters = []
             if company:
-                filters.append(f"company LIKE '%{company}%'")
-                # filters.append(f"company in ({', '.join(company)})")
+                # filters.append(f"company LIKE '%{company}%'")
+                filters.append(f"company in ({', '.join([f"'{comp}'" for comp in company])})")
             if designation:
-                filters.append(f"designation = :designation")
-                # filters.append(f"designation in ({', '.join(company)})")
+                # filters.append(f"designation = {designation}")
+                filters.append(f"designation in ({', '.join(f"'{comp}'" for comp in designation)})")
             if keyword:
-                filters.append(f"description LIKE : '%{keyword}%'")
+                # filters.append(f"description LIKE : '%{keyword}%'")
+                key_filter = " OR ".join([f"description LIKE '%{key.lower()}%'" for key in keyword])
+                filters.append(f"({key_filter})")
 
             # Add filters to query if any
             if filters:
                 query += " WHERE " + " AND ".join(filters)
 
-            query += f" LIMIT :limit"
+            query += f" LIMIT {limit};"
             statement = text(query)
             # Execute the query with the parameters
-            fts_results = self.session.execute(
-                statement,
-                {"company": company, "designation": designation, "keyword": keyword}
+            fts_results = self.session.execute(statement)
                 # {"company": company, "designation": designation, "keyword": keyword, "limit": limit}
-            )
-            return fts_results.fetchall()
+            # )
+            data = fts_results.fetchall()
+            return data
         except SQLAlchemyError as e:
             logging.error(f"Error querying database: {str(e)}")
             return []
         finally:
             self.session.close()
 
-    def get_services(self):
-        """
-        :Title: Funtion to query to 3GPP database to get file content
-        :return:
-        """
-        try:
-            query = text(f"SELECT distinct services from professionals;")
-            fts_results = self.session.execute(query)
-            return fts_results.fetchall()
-        except SQLAlchemyError as e:
-            logging.error(f"Error querying 3GPP database: {str(e)}")
-            return []
-        finally:
-            self.session.close()
 
     def add_attorney(self, user_data: dict):
         """Function to insert a new user record into the professionals table."""
