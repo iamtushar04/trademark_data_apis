@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import create_engine, text, func
 from database.models import Professionals
 
-DATABASE_URL = "sqlite:///D://Database backups//Trademark Websites//law_firms_data.db"
+DATABASE_URL = "sqlite:///database/law_firms_data.db"
 ENGINE = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(bind=ENGINE)
 

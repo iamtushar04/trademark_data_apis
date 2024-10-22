@@ -19,7 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DATABASE_URL = "sqlite:///D://Database backups//Trademark Websites//law_firms_data.db"
+DATABASE_URL = "sqlite:///database/law_firms_data.db"
 
 
 # Instantiate the DatabaseManager class with the SQLite database URL
