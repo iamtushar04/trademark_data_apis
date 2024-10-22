@@ -3,11 +3,8 @@
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from pydantic import BaseModel
-# from source.attorneys import Attorneys
 from source.professionals import Attorneys, get_db
 from starlette.middleware.cors import CORSMiddleware
-from datetime import datetime
 from database.models import Professionals, ProfessionalCreate
 
 router = APIRouter()
@@ -28,7 +25,7 @@ DATABASE_URL = "sqlite:///D://Database backups//Trademark Websites//law_firms_da
 # Instantiate the DatabaseManager class with the SQLite database URL
 # db_manager = Attorneys(DATABASE_URL)
 
-
+KEYWORDS = ["Trademark", 'Patent Prosecution', 'Patent', 'Patents', 'Trademark & Copyright', 'Post-Grant Proceedings ITC Litigation Appellate Litigation', 'Litigation', 'Design Patents']
 @app.get("/get_companies/")
 async def get_companies(db: Session = Depends(get_db)):
     professionals = Attorneys(db)
@@ -36,9 +33,21 @@ async def get_companies(db: Session = Depends(get_db)):
     companies = [company[0] for company in companies]
     designations = professionals.get_designations()
     designations = [designation[0] for designation in designations]
-    services = professionals.get_services()
-    services = [service[0] for service in services]
-    return {"companies": companies, "designations": designations, "services": services}
+    return {"companies": companies, "designations": designations, "keywords": KEYWORDS}
+
+
+@app.get("/get_designations/")
+async def get_designations(company: Optional[list] = Query(None, description="Companies"),
+                           db: Session = Depends(get_db)):
+    professionals = Attorneys(db)
+    if len(company):
+        companies = [f"'{comp}'" for comp in company]
+        companies = ', '.join(companies)
+        designations = professionals.get_designations(companies)
+    else:
+        designations = professionals.get_designations()
+    designations = [designation[0] for designation in designations]
+    return {"msg": "Success", "designations": designations, "status": 200}
 
 
 # # API route to get all users
