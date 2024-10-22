@@ -54,16 +54,19 @@ class Attorneys:
         finally:
             self.session.close()
 
-    def get_designations(self):
+    def get_designations(self, companies: str = None):
         """
         :Title: Funtion to query to 3GPP database to get file content
         :return:
         """
         try:
-            query = text(f"SELECT distinct designation from professionals;")
-            fts_results = self.session.execute(query)
+            query = f"SELECT distinct designation from professionals"
+            if companies:
+                query += f" where company in ({companies}); "
+            fts_query = text(query)
+            fts_results = self.session.execute(fts_query)
             data = fts_results.fetchall()
-            return clean(data)
+            return data
         except SQLAlchemyError as e:
             logging.error(f"Error querying 3GPP database: {str(e)}")
             return []
@@ -114,11 +117,8 @@ class Attorneys:
             if filters:
                 query += " WHERE " + " AND ".join(filters)
 
-            # Limit the number of results
-            # query += f" LIMIT :limit"
-            # Prepare the SQL statement
+            query += f" LIMIT :limit"
             statement = text(query)
-            print(query)
             # Execute the query with the parameters
             fts_results = self.session.execute(
                 statement,
@@ -160,3 +160,5 @@ class Attorneys:
 
     def __del__(self):
         self.session.close()
+
+
