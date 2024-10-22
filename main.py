@@ -34,11 +34,11 @@ async def get_companies(db: Session = Depends(get_db)):
     professionals = Attorneys(db)
     companies = professionals.get_companies()
     companies = [company[0] for company in companies]
-    designations = professionals.get_designations()
-    designations = [designation[0] for designation in designations]
-    services = professionals.get_services()
-    services = [service[0] for service in services]
-    return {"companies": companies, "designations": designations, "services": services}
+    #designations = #professionals.get_designations()
+    #designations = [designation[0] for designation in designations]
+    #services = professionals.get_services()
+    #services = [service[0] for service in services]
+    return {"companies": companies, "designations": [], "services": []}
 
 
 # # API route to get all users

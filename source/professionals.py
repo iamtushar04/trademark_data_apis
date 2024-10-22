@@ -12,8 +12,6 @@ SessionLocal = sessionmaker(bind=ENGINE)
 
 
 def clean(data):
-    import pdb;
-    pdb.set_trace()
     data = [val[0].strip() for val in data if val not in (None, '')]
     return data
 
